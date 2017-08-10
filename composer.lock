@@ -4,7 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "6e23fc54a6a6f772b9d297a862039e64",
+    "hash": "4760f0c94c2e993efdb7326df2e71bce",
+    "content-hash": "ff15f9b55ccc72e086aaf45eccfd2b79",
     "packages": [
         {
             "name": "arbory/omnipay-first-data-latvia",
@@ -43,7 +44,7 @@
                 "source": "https://github.com/arbory/omnipay-first-data-latvia/tree/0.1.0",
                 "issues": "https://github.com/arbory/omnipay-first-data-latvia/issues"
             },
-            "time": "2017-08-09T07:40:51+00:00"
+            "time": "2017-08-09 07:40:51"
         },
         {
             "name": "guzzle/guzzle",
@@ -139,7 +140,7 @@
                 "web service"
             ],
             "abandoned": "guzzlehttp/guzzle",
-            "time": "2015-03-18T18:23:50+00:00"
+            "time": "2015-03-18 18:23:50"
         },
         {
             "name": "omnipay/common",
@@ -237,7 +238,7 @@
                 "payment",
                 "purchase"
             ],
-            "time": "2016-11-07T06:10:23+00:00"
+            "time": "2016-11-07 06:10:23"
         },
         {
             "name": "symfony/event-dispatcher",
@@ -297,7 +298,7 @@
             ],
             "description": "Symfony EventDispatcher Component",
             "homepage": "https://symfony.com",
-            "time": "2017-06-02T07:47:27+00:00"
+            "time": "2017-06-02 07:47:27"
         },
         {
             "name": "symfony/http-foundation",
@@ -350,7 +351,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2017-07-21T11:04:46+00:00"
+            "time": "2017-07-21 11:04:46"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -409,7 +410,7 @@
                 "portable",
                 "shim"
             ],
-            "time": "2017-06-09T14:24:12+00:00"
+            "time": "2017-06-09 14:24:12"
         }
     ],
     "packages-dev": [],
