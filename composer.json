@@ -18,7 +18,7 @@
     ],
 
     "require": {
-        "arbory/omnipay-first-data-latvia": "0.1.*"
+        "arbory/omnipay-first-data-latvia": "~0.1"
     }
 
 }
