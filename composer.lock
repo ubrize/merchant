@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "4760f0c94c2e993efdb7326df2e71bce",
-    "content-hash": "ff15f9b55ccc72e086aaf45eccfd2b79",
+    "hash": "f7c9ba7687bf32df61d47d9dbe80c81d",
+    "content-hash": "ed6c4162ccf4002661dfcd2720efbb27",
     "packages": [
         {
             "name": "arbory/omnipay-first-data-latvia",
