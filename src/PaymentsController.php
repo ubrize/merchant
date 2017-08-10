@@ -21,6 +21,6 @@ class PaymentsController extends Controller
 
         //$gateway = Omnipay::create();
 
-        dump($test);
+        dump($test, $supported);
     }
 }
