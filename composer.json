@@ -1,0 +1,24 @@
+{
+    "name": "arbory/payments",
+    "description": "Payment manager",
+    "type": "project",
+
+    "authors": [
+        {
+            "name": "Martins Ungurs",
+            "email": "martins.ungurs@cube.lv"
+        }
+    ],
+    "minimums-stability": "dev",
+    "repositories": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/arbory/omnipay-first-data-latvia"
+        }
+    ],
+
+    "require": {
+        "arbory/omnipay-first-data-latvia": "0.1.*"
+    }
+
+}
