@@ -34,4 +34,7 @@
 
 `php artisan vendor:publish --provider="Ignited\LaravelOmnipay\LaravelOmnipayServiceProvider" --tag=config`
 
+5. Run migrations
+
+`php artisan migrate`
 
