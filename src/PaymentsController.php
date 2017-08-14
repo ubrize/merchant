@@ -4,23 +4,31 @@ namespace Arbory\Payments;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Omnipay\Omnipay;
+use Arbory\Payments\Events\Initialized;
 
 class PaymentsController extends Controller
 {
-    public function purchase($gatewayHandler, $transactionId = null){
+    public function purchase($gateway, $transactionId = null){
+        $gatewayObj = \Omnipay::gateway($gateway);
 
-        //TODO: load from config available gateways
-        $gateways = [
-            'FirstDataLatvia' => []
-        ];
+        $response = $gatewayObj->purchase([
+            'amount'   => '10.00',
+            'currency' => 'EUR',
+            'description' => 'asd',
+            'clientIp' => '195.62.153.34'
+        ])->send();
 
-        $test = Omnipay::create('FirstDataLatvia');
+        if ($response->isSuccessful()) {
+            // Payment was successful
+            echo  $response->getMessage();
+        } elseif ($response->isRedirect()) {
+            // Redirect to offsite payment gateway
+            $response->redirect();
+        } else {
+            // Payment failed
+            echo $response->getMessage();
+        }
 
-        $supported = Omnipay::getSupportedGateways();
-
-        //$gateway = Omnipay::create();
-
-        dump($test, $supported);
+        dd($gatewayObj);
     }
 }
