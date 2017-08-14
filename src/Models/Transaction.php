@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
-    protected $table = 'payment_transactions';
+    protected $table = 'merchant_transactions';
 
     const STATUS_CREATED     = 1;
     const STATUS_INITIALIZED = 2;

@@ -13,7 +13,7 @@ class CreateTransactionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('payment_transactions', function (Blueprint $table) {
+        Schema::create('merchant_transactions', function (Blueprint $table) {
             $table->increments('id');
             $table->string('objectClass', 255);
             $table->integer('objectId');
@@ -44,6 +44,6 @@ class CreateTransactionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('merchant_transactions');
     }
 }
