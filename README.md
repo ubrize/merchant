@@ -1,7 +1,7 @@
 # Arbory CMS : Payment management module
 
 ## TODO:
-- [ ] Load automatically admin modules (menu?)
+   - [ ] Load automatically admin modules (menu?)
 
 ## Installation
 
@@ -14,27 +14,27 @@
 
 2. Add a ServiceProvider to your providers array in config/app.php:
 
-```php
-'providers' => [ 
-    ...,
-    'Ignited\LaravelOmnipay\LaravelOmnipayServiceProvider'
-]
-```
+   ```php
+   'providers' => [ 
+       ...,
+       'Ignited\LaravelOmnipay\LaravelOmnipayServiceProvider'
+   ]
+   ```
 
 3. Add the Omnipay facade to your facades array in config/app.php:
-```php
-'aliases' => [
-    ...,
-    'Omnipay' => 'Ignited\LaravelOmnipay\Facades\OmnipayFacade'
-]
-```
+   ```php
+   'aliases' => [
+       ...,
+       'Omnipay' => 'Ignited\LaravelOmnipay\Facades\OmnipayFacade'
+   ]
+   ```
 
 
 4. Publish configuration files:
 
-`php artisan vendor:publish --provider="Ignited\LaravelOmnipay\LaravelOmnipayServiceProvider" --tag=config`
+   `php artisan vendor:publish --provider="Ignited\LaravelOmnipay\LaravelOmnipayServiceProvider" --tag=config`
 
 5. Run migrations
 
-`php artisan migrate`
+   `php artisan migrate`
 
