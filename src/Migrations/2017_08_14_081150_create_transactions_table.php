@@ -15,25 +15,24 @@ class CreateTransactionsTable extends Migration
     {
         Schema::create('merchant_transactions', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('objectClass', 255);
-            $table->integer('objectId');
+            $table->string('object_class', 255);
+            $table->integer('object_id');
             $table->tinyInteger('status');
             $table->string('gateway', 255);
             $table->text('options');
             $table->integer('amount');
-            $table->string('tokenId', 70);
-            $table->string('tokenReference', 150);
-            $table->text('description');
-            $table->text('error');
-            $table->text('response');
-            $table->string('languageCode');
-            $table->string('currencyCode');
+            $table->string('token_id', 70);
+            $table->string('token_reference', 150)->nullable();
+            $table->text('description')->nullable();
+            $table->text('error')->nullable();
+            $table->text('response')->nullable();
+            $table->string('language_code');
+            $table->string('currency_code');
             $table->timestamps();
 
             //add indexes
-            $table->unique('tokenId'); // unique per app
-            $table->unique(['tokenReference', 'gateway']); //unique per gateway
-            $table->index('objectId');
+            $table->unique('token_id'); // unique per application
+            $table->index('object_id');
         });
     }
 

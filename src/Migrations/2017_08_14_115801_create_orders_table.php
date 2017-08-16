@@ -22,9 +22,6 @@ class CreateOrdersTable extends Migration
             $table->dateTime('status_updated_at')->nullable();
             $table->dateTime('payment_started_at')->nullable();
             $table->string('language', 30);
-
-            //add indexes
-            $table->unique('status');
         });
     }
 

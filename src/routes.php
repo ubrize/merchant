@@ -1,5 +1,4 @@
 <?php
 
-
-Route::get('payments/{gateway}/purchase/{transactionId?}', Arbory\Payments\PaymentsController::class . '@purchase')->name('purchase');
+Route::any('payments/{gateway}', Arbory\Payments\PaymentsController::class . '@handleGatewayResponse');
 

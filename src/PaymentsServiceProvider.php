@@ -4,6 +4,8 @@ namespace Arbory\Payments;
 
 use Illuminate\Support\ServiceProvider;
 
+use Arbory\Payments\PaymentsService;
+
 class PaymentsServiceProvider extends ServiceProvider
 {
     /**
@@ -25,5 +27,8 @@ class PaymentsServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->make(PaymentsController::class);
+        $this->app->singleton(PaymentsService::class, function ($app) {
+            return new PaymentsService();
+        });
     }
 }
