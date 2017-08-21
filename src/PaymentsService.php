@@ -29,7 +29,7 @@ class PaymentsService{
         if ($response->isSuccessful()) {
             // Payment was successful
             echo  $response->getMessage();
-        } elseif ($response->isRedirect()) {
+        } elseif ($response->isRedirect() || $response->isTransparentRedirect()) {
             // Redirect to offsite payment gateway
             $response->redirect();
         } else {
