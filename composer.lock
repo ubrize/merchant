@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "57d3ca6bff46059d9ecf1e962c0b7b46",
+    "content-hash": "1deb7f17b4d817672a21a042af45caf0",
     "packages": [
         {
             "name": "arbory/omnipay-first-data-latvia",
@@ -44,6 +44,45 @@
                 "issues": "https://github.com/arbory/omnipay-first-data-latvia/issues"
             },
             "time": "2017-08-09T07:40:51+00:00"
+        },
+        {
+            "name": "arbory/omnipay-swedbank-banklink",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/arbory/omnipay-swedbank-banklink.git",
+                "reference": "40617cb209b545a85e4c7e8a908287428bde1107"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/arbory/omnipay-swedbank-banklink/zipball/40617cb209b545a85e4c7e8a908287428bde1107",
+                "reference": "40617cb209b545a85e4c7e8a908287428bde1107",
+                "shasum": ""
+            },
+            "require": {
+                "omnipay/common": "~2.0"
+            },
+            "require-dev": {
+                "omnipay/tests": "~2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Omnipay\\SwedbankBanklink\\": "src/"
+                }
+            },
+            "authors": [
+                {
+                    "name": "Mārtiņš Ungurs",
+                    "email": "martins.ungurs@cube.lv"
+                }
+            ],
+            "description": "Swedbank banklink omnipay package",
+            "support": {
+                "source": "https://github.com/arbory/omnipay-swedbank-banklink/tree/0.1.0",
+                "issues": "https://github.com/arbory/omnipay-swedbank-banklink/issues"
+            },
+            "time": "2017-08-21T13:53:26+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -614,16 +653,16 @@
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.4.0",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "f29dca382a6485c3cbe6379f0c61230167681937"
+                "reference": "7c8fae0ac1d216eb54349e6a8baa57d515fe8803"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/f29dca382a6485c3cbe6379f0c61230167681937",
-                "reference": "f29dca382a6485c3cbe6379f0c61230167681937",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/7c8fae0ac1d216eb54349e6a8baa57d515fe8803",
+                "reference": "7c8fae0ac1d216eb54349e6a8baa57d515fe8803",
                 "shasum": ""
             },
             "require": {
@@ -635,7 +674,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.4-dev"
+                    "dev-master": "1.5-dev"
                 }
             },
             "autoload": {
@@ -669,7 +708,7 @@
                 "portable",
                 "shim"
             ],
-            "time": "2017-06-09T14:24:12+00:00"
+            "time": "2017-06-14T15:44:48+00:00"
         }
     ],
     "packages-dev": [],
