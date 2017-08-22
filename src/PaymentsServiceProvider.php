@@ -15,6 +15,9 @@ class PaymentsServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__ . '/Migrations');
         $this->loadRoutesFrom(__DIR__.'/routes.php');
+        $this->publishes([
+            __DIR__ .'Config/arbory-merchant.php' => config_path('arbory-merchant.php')
+        ]);
     }
 
     /**
@@ -28,5 +31,9 @@ class PaymentsServiceProvider extends ServiceProvider
         $this->app->singleton(PaymentsService::class, function ($app) {
             return new PaymentsService();
         });
+
+        //  $this->mergeConfigFrom(
+        //      __DIR__ . '/Config/arbory-merchant.php', 'arbory-merchant'
+        //  );
     }
 }

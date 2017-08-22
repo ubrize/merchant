@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class PaymentsController extends Controller
 {
-    public function handleGatewayResponse(string $gateway, Request $request){
+    public function completePurchase(string $gateway, Request $request){
         dd($gateway, $request);
     }
 }

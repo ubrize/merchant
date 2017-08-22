@@ -4,6 +4,7 @@ namespace Arbory\Merchant;
 
 use Arbory\Merchant\Models\Order;
 use Arbory\Merchant\Models\Transaction;
+use Illuminate\Http\Request;
 use Omnipay\Common\Message\ResponseInterface;
 
 class PaymentsService{
@@ -38,14 +39,17 @@ class PaymentsService{
         }
     }
 
-    /**
-     * @param ResponseInterface $response
-     */
-    public function handleGatewayResponse(ResponseInterface $response)
+    public function completePurchase(string $gatewayName, Request $request)
     {
+        // get transaction from request
 
-        //TODO: make me!
-        dd($response);
+        // check trasaction state
+        $gatewayObj = \Omnipay::gateway($gatewayName);
+        $gatewayObj->completePurchase();
+
+        // return true if transaction succesfull?
+
+        // return false if failed, store error in session?
     }
 
     /**
