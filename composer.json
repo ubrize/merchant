@@ -9,22 +9,11 @@
             "email": "martins.ungurs@cube.lv"
         }
     ],
-    "repositories": [
-      {
-        "type": "vcs",
-        "url": "https://github.com/arbory/omnipay-first-data-latvia"
-      },
-      {
-        "type": "vcs",
-        "url": "https://github.com/arbory/omnipay-swedbank-banklink"
-      }
-    ],
+    "repositories": [],
     "autoload": {
       "psr-4": { "Arbory\\Payments\\" : "src/" }
     },
     "require": {
-        "arbory/omnipay-first-data-latvia": "~0.1.0",
-        "arbory/omnipay-swedbank-banklink": "~0.1.0",
         "ignited/laravel-omnipay": "2.*"
     }
 
