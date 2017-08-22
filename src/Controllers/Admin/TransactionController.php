@@ -1,12 +1,12 @@
 <?php
 
-namespace Arbory\Payments\Controllers\Admin;
+namespace Arbory\Merchant\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Arbory\Base\Admin\Form;
 use Arbory\Base\Admin\Grid;
 use Arbory\Base\Admin\Traits\Crudify;
-use Arbory\Payments\Models\Transaction;
+use Arbory\Merchant\Models\Transaction;
 use Illuminate\Database\Eloquent\Model;
 use Arbory\Base\Admin\Form\Fields\Hidden;
 use Illuminate\Support\Collection;

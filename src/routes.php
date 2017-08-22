@@ -1,4 +1,4 @@
 <?php
 
-Route::any('payments/{gateway}', Arbory\Payments\PaymentsController::class . '@handleGatewayResponse');
+Route::any('payments/{gateway}', Arbory\Merchant\PaymentsController::class . '@handleGatewayResponse');
 

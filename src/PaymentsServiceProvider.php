@@ -1,10 +1,8 @@
 <?php
 
-namespace Arbory\Payments;
+namespace Arbory\Merchant;
 
 use Illuminate\Support\ServiceProvider;
-
-use Arbory\Payments\PaymentsService;
 
 class PaymentsServiceProvider extends ServiceProvider
 {

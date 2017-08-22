@@ -1,6 +1,6 @@
 <?php
 
-namespace Arbory\Payments\Repositories;
+namespace Arbory\Merchant\Repositories;
 
 class OrderRepository implements OrderRepositoryInterface
 {

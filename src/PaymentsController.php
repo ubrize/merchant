@@ -1,6 +1,6 @@
 <?php
 
-namespace Arbory\Payments;
+namespace Arbory\Merchant;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

@@ -1,12 +1,12 @@
 <?php
-namespace Arbory\Payments\Models;
+namespace Arbory\Merchant\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class Order
  *
- * @package Arbory\Payments\Models
+ * @package Arbory\Merchant\Models
  * @mixin \Eloquent
  */
 class Order extends Model

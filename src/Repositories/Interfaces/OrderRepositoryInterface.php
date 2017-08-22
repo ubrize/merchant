@@ -1,8 +1,8 @@
 <?php
 
-namespace Arbory\Payments\Repositories\Interfaces;
+namespace Arbory\Merchant\Repositories\Interfaces;
 
-use Arbory\Payments\Models\Order;
+use Arbory\Merchant\Models\Order;
 
 interface OrderRepositoryInterface
 {

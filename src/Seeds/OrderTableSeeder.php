@@ -1,8 +1,8 @@
 <?php
 
-namespace Arbory\Payments\Seeds;
+namespace Arbory\Merchant\Seeds;
 
-use Arbory\Payments\Models\Order;
+use Arbory\Merchant\Models\Order;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 

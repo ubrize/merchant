@@ -1,5 +1,5 @@
 <?php
-namespace Arbory\Payments\Models;
+namespace Arbory\Merchant\Models;
 
 use Illuminate\Database\Eloquent\Model;
 

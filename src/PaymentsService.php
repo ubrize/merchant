@@ -1,9 +1,9 @@
 <?php
 
-namespace Arbory\Payments;
+namespace Arbory\Merchant;
 
-use Arbory\Payments\Models\Order;
-use Arbory\Payments\Models\Transaction;
+use Arbory\Merchant\Models\Order;
+use Arbory\Merchant\Models\Transaction;
 use Omnipay\Common\Message\ResponseInterface;
 
 class PaymentsService{

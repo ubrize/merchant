@@ -1,6 +1,6 @@
 {
-    "name": "arbory/payments",
-    "description": "Payment manager",
+    "name": "arbory/merchant",
+    "description": "Arbory merchant module",
     "type": "project",
 
     "authors": [
@@ -11,7 +11,7 @@
     ],
     "repositories": [],
     "autoload": {
-      "psr-4": { "Arbory\\Payments\\" : "src/" }
+      "psr-4": { "Arbory\\Merchant\\" : "src/" }
     },
     "require": {
         "ignited/laravel-omnipay": "2.*"
