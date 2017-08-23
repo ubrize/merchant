@@ -20,7 +20,7 @@ class PaymentsService
 
             /** @var Transaction $transaction */
             $transaction = $this->createTransaction($order, $gatewayObj);
-            $this->setPurchaseArgs($transaction, $order, $customArgs);
+            $this->setPurchaseArgs($transaction, $gatewayObj, $order, $customArgs);
 
             $response = $gatewayObj->purchase($transaction->options['purchase'])->send();
 
@@ -103,16 +103,24 @@ class PaymentsService
         $transaction->save();
     }
 
-    private function setPurchaseArgs(Transaction $transaction, Order $order, $customArgs)
+    private function setPurchaseArgs(Transaction $transaction, GatewayInterface $gatewayObj, Order $order, $customArgs)
     {
-        $defArgs = [
+        // Each gateway can have a little different request arguments
+        $gatewayHandler = (new GatewayHandlerFactory())->create($gatewayObj);
+        $gatewayArgs = $gatewayHandler->getPurchaseArguments($transaction);
+
+        // These arguments are common for all gateways
+        $commonArgs = [
             'language' => $order->language, //gateway dependant
             'amount' => $order->getAmountDecimal(),
             'currency' => $order->payment_currency
         ];
 
+        // Custom arguments from checkout (purchase description etc.)
+        $args = $customArgs + $gatewayArgs + $commonArgs;
+
         $options = $transaction->options;
-        $options['purchase'] = ($customArgs + $defArgs);
+        $options['purchase'] = $args;
         $transaction->options = $options;
         $transaction->save();
     }
