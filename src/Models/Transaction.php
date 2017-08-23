@@ -17,5 +17,9 @@ class Transaction extends Model
 
     protected $table = 'merchant_transactions';
 
-    protected $fillable = ['object_class', 'object_id', 'status', 'gateway', 'options', 'amount', 'token_id', 'description', 'language_code', 'currency_code'];
+    protected $fillable = ['object_class', 'object_id', 'status', 'gateway', 'options', 'amount', 'token_id', 'description', 'language_code', 'currency_code', 'client_ip'];
+
+    protected $casts = [
+        'options' => 'array'
+    ];
 }

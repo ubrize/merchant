@@ -20,7 +20,9 @@ class Order extends Model
     const STATUS_CANCELED   = 5;
 
     public function getAmountDecimal(){
-        return round(($this->payment_amount/100), 2, PHP_ROUND_HALF_EVEN);
+        // round and float
+        $float = round(($this->payment_amount/100), 2, PHP_ROUND_HALF_EVEN);
+        return number_format($float, 2, '.', '');
     }
 
     public function getCurrency(){

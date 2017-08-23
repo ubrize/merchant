@@ -4,56 +4,72 @@ namespace Arbory\Merchant;
 
 use Arbory\Merchant\Models\Order;
 use Arbory\Merchant\Models\Transaction;
+use Arbory\Merchant\Utils\GatewayHandlerFactory;
 use Illuminate\Http\Request;
+use Omnipay\Common\GatewayInterface;
 use Omnipay\Common\Message\ResponseInterface;
 
-class PaymentsService{
-    /**
-     * @param Order  $order
-     * @param string $gatewayName
-     * @param array  $parameters
-     */
-    public function purchase(Order $order, string $gatewayName, array $gatewayRequestArgs)
+class PaymentsService
+{
+
+    public function purchase(Order $order, string $gatewayName, array $customArgs)
     {
-        /** @var Transaction $transaction */
-        $transaction = $this->createTransaction($order, $gatewayName, $gatewayRequestArgs);
-        $gatewayObj = \Omnipay::gateway($gatewayName);
+        try {
+            // Will throw exception if not existing gateway
+            $gatewayObj = \Omnipay::gateway($gatewayName);
 
-        // Send transaction request to gateway
-        $response = $gatewayObj->purchase($this->getPurchaseArguments($transaction, $gatewayRequestArgs ))->send();
+            /** @var Transaction $transaction */
+            $transaction = $this->createTransaction($order, $gatewayObj);
+            $this->setPurchaseArgs($transaction, $order, $customArgs);
 
-        // Save transactions reference if gateway responds with it
-        $this->saveTransactionReference($transaction, $response);
-        $this->setTransactionInitialized($transaction);
+            $response = $gatewayObj->purchase($transaction->options['purchase'])->send();
 
-        // Check if transaction is complete
-        if ($response->isSuccessful()) {
-            // Payment was successful
-            echo  $response->getMessage();
-        } elseif ($response->isRedirect() || $response->isTransparentRedirect()) {
-            // Redirect to offsite payment gateway
-            $response->redirect();
-        } else {
-            // Payment failed
-            echo $response->getMessage();
+            // Save transactions reference if gateway responds with it
+            $this->saveTransactionReference($transaction, $response);
+            $this->setTransactionInitialized($transaction);
+
+            if ($response->isSuccessful()) {
+                // Payment successful
+            } elseif ($response->isRedirect() || $response->isTransparentRedirect()) {
+                $response->redirect();
+            } else {
+                // Payment failed
+                echo $response->getMessage();
+            }
+        } catch (\Exception $e) {
+            dd($e);
         }
     }
 
     public function completePurchase(string $gatewayName, Request $request)
     {
-        // get transaction from request
+        try {
+            // Will throw exception if not existing gateway
+            $gatewayObj = \Omnipay::gateway($gatewayName);
 
-        // check trasaction state
-        $gatewayObj = \Omnipay::gateway($gatewayName);
-        $gatewayObj->completePurchase();
+            /** @var Transaction $transaction */
+            $transaction = $this->getRequestsTransaction($gatewayObj, $request);
+            $this->setCompletionArgs($transaction, $gatewayObj);
 
-        // return true if transaction succesfull?
+            //TODO: add parameters for each gateway
+            $response = $gatewayObj->completePurchase($transaction->options['completePurchase'])->send();
 
-        // return false if failed, store error in session?
+            if ($response->isSuccessful()) {
+                // purchase finished
+                $gut = 1;
+            } else {
+                //we got error, save and responde
+                echo $response->getMessage();
+            }
+
+        } catch (\Exception $e) {
+            dd($e);
+        }
     }
 
     /**
      * Some gateways will send their token reference (gateways own token for transaction)
+     *
      * @param ResponseInterface $response
      */
     private function saveTransactionReference(Transaction $transaction, ResponseInterface $response)
@@ -62,36 +78,60 @@ class PaymentsService{
         $transaction->save();
     }
 
-    /**
-     * @param ResponseInterface $response
-     * @param Order             $order
-     * @param string            $gatewayName
-     * @param array             $parameters
-     * @return $this|\Illuminate\Database\Eloquent\Model
-     */
-    private function createTransaction(Order $order, string $gatewayName, array $parameters)
+    private function getRequestsTransaction(GatewayInterface $gateway, Request $request) : Transaction
     {
-        return Transaction::create([
-            'object_class'      => get_class($order),
-            'object_id'         => $order->id,
-            'status'            => Transaction::STATUS_CREATED,
-            'gateway'           => $gatewayName,
-            'options'           => json_encode($parameters),
-            'amount'            => $order->getAmountDecimal(),
-            'token_id'          => str_random('20'), //TODO: Do we need internal token?
-            'description'       => '',
-            'language_code'     => $order->language,
-            'currency_code'     => $order->payment_currency,
-        ]);
+        $gatewayClassName = get_class($gateway);
+        $gatewayHandler = (new GatewayHandlerFactory())->create($gateway);
+        $transactionRef = $gatewayHandler->getTransactionReference($request);
+
+        if ($transactionRef) {
+            // Get by unique reference token per gateway
+            return Transaction::where('token_reference', $transactionRef)->where('gateway', $gatewayClassName)->firstOrFail();
+        } else {
+            //TODO: if fails, try to search by transaction id ?
+        }
+
+        throw new \InvalidArgumentException('Transaction not found');
     }
 
-    private function getPurchaseArguments(Transaction $transaction, array $customArgs = []){
-        $args = [
-            'language'      => $transaction->language_code, //gateway dependant
-            'amount'        => $transaction->amount,
-            'currency'      => $transaction->currency_code
+    private function setCompletionArgs(Transaction $transaction, GatewayInterface $gatewayObj)
+    {
+        $gatewayHandler = (new GatewayHandlerFactory())->create($gatewayObj);
+        $options = $transaction->options;
+        $options['completePurchase'] = $gatewayHandler->getCompletePurchaseArguments($transaction);
+        $transaction->options = $options;
+        $transaction->save();
+    }
+
+    private function setPurchaseArgs(Transaction $transaction, Order $order, $customArgs)
+    {
+        $defArgs = [
+            'language' => $order->language, //gateway dependant
+            'amount' => $order->getAmountDecimal(),
+            'currency' => $order->payment_currency
         ];
-        return ($customArgs + $args);
+
+        $options = $transaction->options;
+        $options['purchase'] = ($customArgs + $defArgs);
+        $transaction->options = $options;
+        $transaction->save();
+    }
+
+    private function createTransaction(Order $order, GatewayInterface $gateway)
+    {
+        return Transaction::create([
+            'object_class' => get_class($order),
+            'object_id' => $order->id,
+            'status' => Transaction::STATUS_CREATED,
+            'gateway' => get_class($gateway),
+            'options' => [], // will be populated on every request
+            'amount' => $order->getAmountDecimal(),
+            'token_id' => str_random('20'), //TODO: Do we need internal token?
+            'description' => '',
+            'language_code' => $order->language,
+            'currency_code' => $order->payment_currency,
+            'client_ip' => request()->ip()
+        ]);
     }
 
     private function setTransactionInitialized(Transaction $transaction)
