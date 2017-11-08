@@ -19,7 +19,7 @@ class OrderTableSeeder extends Seeder
         \DB::table($model->getTable())->insert([
             'id' => 1,
             'status' => Order::STATUS_CART,
-            'payment_amount' => 100,
+            'total' => 100,
             'payment_currency' => 'EUR',
             'language' => 'lv'
         ]);
