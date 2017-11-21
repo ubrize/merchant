@@ -24,7 +24,6 @@ class Order extends Model
     protected $fillable = [
         'status',
         'total',
-        'total_vat',
         'payment_currency',
         'status_updated_at',
         'payment_started_at',
@@ -60,14 +59,12 @@ class Order extends Model
             'vat' => $item->getVatRate(),
             'quantity' => $item->getQuantity(),
             'total' => intval($item->getTotal()),
-            'total_vat' => intval($item->getTotalVat()),
             'summary' => $item->getSummary()
         ];
 
         $orderLine = $this->orderLines()->create($params);
 
         $this->total += $orderLine->total;
-        $this->total_vat += $orderLine->total_vat;
         $this->save();
 
         return $orderLine;
@@ -80,7 +77,6 @@ class Order extends Model
         });
 
         $this->total = 0;
-        $this->total_vat = 0;
         $this->save();
     }
 
