@@ -1,4 +1,5 @@
 <?php
+
 namespace Arbory\Merchant\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -46,43 +47,5 @@ class Order extends Model
     public function getCurrency()
     {
         return $this->currency_code;
-    }
-
-    public function add(Orderable $item)
-    {
-        $params = [
-            'order_id' => $this->id,
-            'object_options' => $item->getOptions(),
-            'object_class' => $item->getClass(),
-            'object_id' => $item->getId(),
-            'price' => $item->getPrice(),
-            'vat' => $item->getVatRate(),
-            'quantity' => $item->getQuantity(),
-            'total' => intval($item->getTotal()),
-            'summary' => $item->getSummary()
-        ];
-
-        $orderLine = $this->orderLines()->create($params);
-
-        $this->total += $orderLine->total;
-        $this->save();
-
-        return $orderLine;
-    }
-
-    public function empty(){
-        $this->orderLines()->each(function($line){
-            /** @var OrderLine $line */
-            $line->delete();
-        });
-
-        $this->total = 0;
-        $this->save();
-    }
-
-    public static function getExistingInCart($sessionId)
-    {
-        $cartOrder = Order::where('session_id', $sessionId)->where('status', self::STATUS_CART)->first();
-       return $cartOrder;
     }
 }

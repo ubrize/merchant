@@ -17,11 +17,15 @@ class OrderLine extends Model
         'vat',
         'quantity',
         'total',
-        'total_vat'
+        'summary'
     ];
 
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
+
+    protected $casts = [
+        'object_options' => 'array',
+    ];
 }

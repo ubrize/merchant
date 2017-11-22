@@ -44,7 +44,7 @@ interface Orderable
      *
      * @return array
      */
-    public function getOptions();
+    public function getOptions() : array;
 
     /**
      * Get the item quantity
