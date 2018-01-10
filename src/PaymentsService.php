@@ -8,6 +8,8 @@ use Arbory\Merchant\Utils\GatewayHandlerFactory;
 use Illuminate\Http\Request;
 use Omnipay\Common\GatewayInterface;
 use Omnipay\Common\Message\ResponseInterface;
+use Illuminate\Support\Facades\Log;
+use Arbory\Merchant\Utils\CompletedPurchase;
 
 class PaymentsService
 {
@@ -59,6 +61,12 @@ class PaymentsService
     }
 
 
+    /**
+     * Returns transaction if payment completed or false if payment failed
+     * @param string $gatewayName
+     * @param Request $request
+     * @return CompletedPurchase
+     */
     public function completePurchase(string $gatewayName, Request $request)
     {
         try {
@@ -67,22 +75,33 @@ class PaymentsService
 
             /** @var Transaction $transaction */
             $transaction = $this->getRequestsTransaction($gatewayObj, $request);
+            $this->logTransactionResponse($transaction, $request->input());
+
             $this->setCompletionArgs($transaction, $gatewayObj);
 
-            //TODO: add parameters for each gateway
-            $response = $gatewayObj->completePurchase($transaction->options['completePurchase'])->send();
+            //TODO: add parameters for each gateway?!
+            $completeRequest = $gatewayObj->completePurchase($transaction->options['completePurchase']);
+            $this->logTransactionRequest($transaction, $completeRequest->getData());
+
+            $response = $completeRequest->send();
+            $this->logTransactionResponse($transaction, $response->getData());
 
             if ($response->isSuccessful()) {
                 // purchase finished
-                $gut = 1;
-            } else {
-                //we got error, save and responde
-                echo $response->getMessage();
+                $this->setTransactionProcessed($transaction);
+                return new CompletedPurchase(true, $transaction);
             }
 
+            //we got error
+            $this->setTransactionError($transaction);
+            $this->logTransactionError($transaction, $response->getData());
+
+            return new CompletedPurchase(false, $transaction);
         } catch (\Exception $e) {
-            dd($e);
+            \Log::warning('PaymentService:completePurchase:'.$e->getMessage());
         }
+
+        return new CompletedPurchase(false);
     }
 
     /**
