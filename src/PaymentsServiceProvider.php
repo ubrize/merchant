@@ -14,7 +14,6 @@ class PaymentsServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadMigrationsFrom(__DIR__ . '/Migrations');
-        $this->loadRoutesFrom(__DIR__.'/routes.php');
         $this->publishes([
             __DIR__ . DIRECTORY_SEPARATOR .'Config'. DIRECTORY_SEPARATOR .'arbory-merchant.php' => config_path('arbory-merchant.php')
         ]);
@@ -27,7 +26,6 @@ class PaymentsServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->make(PaymentsController::class);
         $this->app->singleton(PaymentsService::class, function ($app) {
             return new PaymentsService();
         });
