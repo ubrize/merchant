@@ -2,6 +2,7 @@
 
 namespace Arbory\Merchant\Seeds;
 
+use App\Order\OrderStatusType;
 use Arbory\Merchant\Models\Order;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,7 @@ class OrderTableSeeder extends Seeder
         $model = new Order();
         \DB::table($model->getTable())->insert([
             'id' => 1,
-            'status' => Order::STATUS_CART,
+            'status' => OrderStatusType::STATUS_CART,
             'total' => 100,
             'payment_currency' => 'EUR',
             'language' => 'lv'

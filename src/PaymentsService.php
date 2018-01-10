@@ -12,6 +12,12 @@ use Omnipay\Common\Message\ResponseInterface;
 class PaymentsService
 {
 
+    /**
+     * @param Order $order
+     * @param string $gatewayName
+     * @param array $customArgs
+     * @return bool redirects or returns bool ir payment is successful
+     */
     public function purchase(Order $order, string $gatewayName, array $customArgs)
     {
         try {
@@ -20,26 +26,38 @@ class PaymentsService
 
             /** @var Transaction $transaction */
             $transaction = $this->createTransaction($order, $gatewayObj);
-            $this->setPurchaseArgs($transaction, $gatewayObj, $order, $customArgs);
+            $this->setPurchaseArgs($transaction, $gatewayObj, $customArgs);
 
-            $response = $gatewayObj->purchase($transaction->options['purchase'])->send();
+            $purchaseRequest = $gatewayObj->purchase($transaction->options['purchase']);
+            $this->logTransactionRequest($transaction, $purchaseRequest->getData());
+
+            $response = $purchaseRequest->send();
+            $this->logTransactionResponse($transaction, $response->getData());
 
             // Save transactions reference if gateway responds with it
             $this->saveTransactionReference($transaction, $response);
             $this->setTransactionInitialized($transaction);
 
             if ($response->isSuccessful()) {
+                $this->setTransactionProcessed($transaction);
                 // Payment successful
+                return true;
             } elseif ($response->isRedirect() || $response->isTransparentRedirect()) {
+                $this->setTransactionAccepted($transaction);
                 $response->redirect();
             } else {
                 // Payment failed
-                echo $response->getMessage();
+                $this->setTransactionError($transaction);
+                $this->logTransactionError($transaction, $response->getMessage());
             }
         } catch (\Exception $e) {
-            dd($e);
+            $this->setTransactionError($transaction);
+            $this->logTransactionError($transaction, $e->getCode() .':'. $e->getMessage());
         }
+
+        return false;
     }
+
 
     public function completePurchase(string $gatewayName, Request $request)
     {
@@ -103,7 +121,7 @@ class PaymentsService
         $transaction->save();
     }
 
-    private function setPurchaseArgs(Transaction $transaction, GatewayInterface $gatewayObj, Order $order, $customArgs)
+    private function setPurchaseArgs(Transaction $transaction, GatewayInterface $gatewayObj, $customArgs)
     {
         // Each gateway can have a little different request arguments
         $gatewayHandler = (new GatewayHandlerFactory())->create($gatewayObj);
@@ -111,9 +129,9 @@ class PaymentsService
 
         // These arguments are common for all gateways
         $commonArgs = [
-            'language' => $order->language, //gateway dependant
-            'amount' => $order->getAmountDecimal(),
-            'currency' => $order->payment_currency
+            'language' => $transaction->language_code, //gateway dependant
+            'amount' => $this->transformToFloat($transaction->amount),
+            'currency' => $transaction->currency_code
         ];
 
         // Custom arguments from checkout (purchase description etc.)
@@ -125,6 +143,13 @@ class PaymentsService
         $transaction->save();
     }
 
+    //Int to float with 2 numbers after floating point
+    public function transformToFloat($intValue){
+        // round and float
+        $float = round(($intValue/100), 2, PHP_ROUND_HALF_EVEN);
+        return number_format($float, 2, '.', '');
+    }
+
     private function createTransaction(Order $order, GatewayInterface $gateway)
     {
         return Transaction::create([
@@ -133,7 +158,7 @@ class PaymentsService
             'status' => Transaction::STATUS_CREATED,
             'gateway' => get_class($gateway),
             'options' => [], // will be populated on every request
-            'amount' => $order->getAmountDecimal(),
+            'amount' => $order->total,
             'token_id' => str_random('20'), //TODO: Do we need internal token?
             'description' => '',
             'language_code' => $order->language,
@@ -142,9 +167,49 @@ class PaymentsService
         ]);
     }
 
-    private function setTransactionInitialized(Transaction $transaction)
+    protected function setTransactionInitialized(Transaction $transaction)
     {
         $transaction->status == Transaction::STATUS_INITIALIZED;
+        $transaction->save();
+    }
+
+    protected function setTransactionAccepted(Transaction $transaction)
+    {
+        $transaction->status == Transaction::STATUS_ACCEPTED;
+        $transaction->save();
+    }
+
+    protected function setTransactionProcessed(Transaction $transaction)
+    {
+        $transaction->status == Transaction::STATUS_PROCESSED;
+        $transaction->save();
+    }
+
+    protected function setTransactionError(Transaction $transaction)
+    {
+        $transaction->status == Transaction::STATUS_PROCESSED;
+        $transaction->save();
+    }
+
+
+    protected function logTransactionError(Transaction $transaction, $msg)
+    {
+        $transaction->refresh();
+        $transaction->error = $transaction->error . '[error|'. date('Y.m.d h:i:s') .']: ' . print_r($msg, true);
+        $transaction->save();
+    }
+
+    protected function logTransactionRequest(Transaction $transaction, $msg)
+    {
+        $transaction->refresh();
+        $transaction->response = $transaction->response . '[request|'. date('Y.m.d h:i:s').']: '  . print_r($msg, true);
+        $transaction->save();
+    }
+
+    protected function logTransactionResponse(Transaction $transaction, $msg)
+    {
+        $transaction->refresh();
+        $transaction->response = $transaction->response . '[response|'. date('Y.m.d h:i:s').']: '  . print_r($msg, true);
         $transaction->save();
     }
 }

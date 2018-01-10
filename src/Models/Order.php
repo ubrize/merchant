@@ -2,6 +2,7 @@
 
 namespace Arbory\Merchant\Models;
 
+use App\OrderHelper;
 use Illuminate\Database\Eloquent\Model;
 use Arbory\Merchant\Utils\Orderable;
 use Arbory\Merchant\Models\OrderLine;
@@ -14,13 +15,8 @@ use Arbory\Merchant\Models\OrderLine;
  */
 class Order extends Model
 {
-    protected $table = 'merchant_orders';
 
-    const STATUS_CART = 1;
-    const STATUS_PENDING = 2;
-    const STATUS_PROCESSING = 3;
-    const STATUS_COMPLETE = 4;
-    const STATUS_CANCELED = 5;
+    protected $table = 'merchant_orders';
 
     protected $fillable = [
         'status',
@@ -47,5 +43,10 @@ class Order extends Model
     public function getCurrency()
     {
         return $this->currency_code;
+    }
+
+    public function __toString()
+    {
+        return (string) OrderHelper::getOrderNumber($this);
     }
 }
