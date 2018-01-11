@@ -46,6 +46,7 @@ class PaymentsService
                 return true;
             } elseif ($response->isRedirect() || $response->isTransparentRedirect()) {
                 $this->setTransactionAccepted($transaction);
+                $this->logTransactionRequest($transaction, 'redirect to merchant..');
                 $response->redirect();
             } else {
                 // Payment failed
@@ -124,8 +125,6 @@ class PaymentsService
         if ($transactionRef) {
             // Get by unique reference token per gateway
             return Transaction::where('token_reference', $transactionRef)->where('gateway', $gatewayClassName)->firstOrFail();
-        } else {
-            //TODO: if fails, try to search by transaction id ?
         }
 
         throw new \InvalidArgumentException('Transaction not found');
@@ -180,10 +179,23 @@ class PaymentsService
             'amount' => $order->total,
             'token_id' => str_random('20'), //TODO: Do we need internal token?
             'description' => '',
-            'language_code' => $order->language,
+            'language_code' => $this->getGatewaysLanguage($gateway, $order->language),
             'currency_code' => $order->payment_currency,
             'client_ip' => request()->ip()
         ]);
+    }
+
+    /**
+     * Gets gateways supported language code. $suggestedLanguage serves two purposes :
+     * 1. if gateway only accepts specific language codes, default or the closest one to $suggestedLanguage will be returned
+     * 2. if gateway has custom language codes, then $suggestedLanguage will be returned and used
+     * @param GatewayInterface $gateway
+     * @param string $suggestedLanguage  //2 characters code for language https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+     * @return string
+     */
+    protected function getGatewaysLanguage(GatewayInterface $gateway, string $suggestedLanguage)
+    {
+         return (new GatewayHandlerFactory())->create($gateway)->getLanguage($suggestedLanguage);
     }
 
     protected function setTransactionInitialized(Transaction $transaction)

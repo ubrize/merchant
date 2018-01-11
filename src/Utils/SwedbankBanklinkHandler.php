@@ -18,4 +18,18 @@ class SwedbankBanklinkHandler extends GatewayHandler
             'transactionReference' => $transaction->token_id
         ];
     }
+
+    public function getLanguage(string $suggestedLanguage): string
+    {
+        $defaultLangauge = 'LAT';
+        $codeToSupportedLang = [
+            'lv' => 'LAT',
+            'ru' => 'RUS',
+            'en' => 'ENG'
+        ];
+        if(isset($codeToSupportedLang[$suggestedLanguage])){
+            return $codeToSupportedLang($suggestedLanguage);
+        }
+        return $defaultLangauge;
+    }
 }

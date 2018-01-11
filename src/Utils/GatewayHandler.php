@@ -5,16 +5,27 @@ namespace Arbory\Merchant\Utils;
 use Arbory\Merchant\Models\Transaction;
 use Illuminate\Http\Request;
 
-abstract class GatewayHandler{
-    public abstract function getTransactionReference(Request $request) : string ;
+abstract class GatewayHandler
+{
+    public abstract function getTransactionReference(Request $request): string;
 
-    public function getCompletePurchaseArguments(Transaction $transaction) : array
+    public function getCompletePurchaseArguments(Transaction $transaction): array
     {
         return [];
     }
 
-    public function getPurchaseArguments(Transaction $transaction) : array
+    public function getPurchaseArguments(Transaction $transaction): array
     {
         return [];
+    }
+
+    /**
+     *
+     * @param string $suggestedLanguage 2 character code, used standard - https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+     * @return string
+     */
+    public function getLanguage(string $suggestedLanguage): string
+    {
+        return $suggestedLanguage;
     }
 }
