@@ -46,7 +46,7 @@ class PaymentsService
                 return true;
             } elseif ($response->isRedirect() || $response->isTransparentRedirect()) {
                 $this->setTransactionAccepted($transaction);
-                $this->logTransactionRequest($transaction, 'redirect to merchant..');
+                $this->logTransactionRequest($transaction, ['redirect to merchant..']);
                 $response->redirect();
             } else {
                 // Payment failed
@@ -200,25 +200,25 @@ class PaymentsService
 
     protected function setTransactionInitialized(Transaction $transaction)
     {
-        $transaction->status == Transaction::STATUS_INITIALIZED;
+        $transaction->status = Transaction::STATUS_INITIALIZED;
         $transaction->save();
     }
 
     protected function setTransactionAccepted(Transaction $transaction)
     {
-        $transaction->status == Transaction::STATUS_ACCEPTED;
+        $transaction->status = Transaction::STATUS_ACCEPTED;
         $transaction->save();
     }
 
     protected function setTransactionProcessed(Transaction $transaction)
     {
-        $transaction->status == Transaction::STATUS_PROCESSED;
+        $transaction->status = Transaction::STATUS_PROCESSED;
         $transaction->save();
     }
 
     protected function setTransactionError(Transaction $transaction)
     {
-        $transaction->status == Transaction::STATUS_PROCESSED;
+        $transaction->status = Transaction::STATUS_ERROR;
         $transaction->save();
     }
 

@@ -22,4 +22,9 @@ class Transaction extends Model
     protected $casts = [
         'options' => 'array'
     ];
+
+    public function order()
+    {
+        return $this->morphTo('object', 'object_class', 'object_id');
+    }
 }
