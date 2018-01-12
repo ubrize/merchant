@@ -25,6 +25,6 @@ class Transaction extends Model
 
     public function order()
     {
-        return $this->morphTo('object', 'object_class', 'object_id');
+        return $this->morphTo('order', 'object_class', 'object_id');
     }
 }

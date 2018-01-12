@@ -7,6 +7,13 @@ use Arbory\Merchant\Models\Transaction;
 
 class FirstDataLatviaHandler extends GatewayHandler
 {
+    public function getReversalArguments(Transaction $transaction): array
+    {
+        return [
+            'transactionReference' => $transaction->token_reference
+        ];
+    }
+
     public function getTransactionReference(Request $request): string
     {
         $transactionRef = $request->get('trans_id', '');

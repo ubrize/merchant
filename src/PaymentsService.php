@@ -46,6 +46,10 @@ class PaymentsService
                 return new Response(true, $transaction);
 
             } elseif ($response->isRedirect() || $response->isTransparentRedirect()) {
+                // Save transactions reference, if gateway responds with it
+                $this->saveTransactionReference($transaction, $response);
+                $this->setTransactionInitialized($transaction);
+
                 $this->setTransactionAccepted($transaction);
                 $this->logTransactionRequest($transaction, ['redirect to merchant..']);
                 $response->redirect();
@@ -122,15 +126,26 @@ class PaymentsService
         //this is custom method gateways method
         //TODO: combine reverse with refund and determine correct response via passed option value?
         if(!method_exists($gatewayObj, 'reverse')){
-            throw new \Exception("$gatewayName does not support transaction reversal");
+            throw new \Exception("$transaction->gateway does not support transaction reversal");
         }
 
         $this->setReversalArgs($transaction, $gatewayObj, ['amount' => $amount]);
+        /** @var AbstractResponse $request */
+        $request = $gatewayObj->reverse($transaction->options['reverseTransaction']);
+        $this->logTransactionRequest($transaction, $request->getData());
         /** @var AbstractResponse $response */
-        $response = $gatewayObj->reverse($transaction->options['reverseTransaction']);
+        $response = $request->send();
+        $this->logTransactionResponse($transaction, $response->getData());
+
         if($response->isSuccessful()){
+            //mark transaction as reversed
+            $transaction->status = Transaction::STATUS_REVERSED;
+            $transaction->save();
+
             return new Response(true, $transaction);
         }
+
+        $this->logTransactionError($transaction, $response->getData());
         return new Response(false, $transaction);
     }
 
