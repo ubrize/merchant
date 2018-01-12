@@ -162,6 +162,7 @@ class PaymentsService
         $request = $gatewayObj->closeDay();
         /** @var AbstractResponse $response */
         $response = $request->send();
+        \Log::info('PaymentService:closeDay - ' . print_r($response->getData(), 1));
         return new Response($response->isSuccessful());
     }
     /**
