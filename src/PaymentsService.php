@@ -36,12 +36,11 @@ class PaymentsService
             $response = $purchaseRequest->send();
             $this->logTransactionResponse($transaction, $response->getData());
 
-            // Save transactions reference if gateway responds with it
-            $this->saveTransactionReference($transaction, $response);
-            $this->setTransactionInitialized($transaction);
-
             if ($response->isSuccessful()) {
-                // Payment successful
+                // Save transactions reference, if gateway responds with it
+                $this->saveTransactionReference($transaction, $response);
+                $this->setTransactionInitialized($transaction);
+
                 $this->setTransactionProcessed($transaction);
                 return new Response(true, $transaction);
 
