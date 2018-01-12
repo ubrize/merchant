@@ -4,7 +4,7 @@ namespace Arbory\Merchant\Utils;
 
 use Arbory\Merchant\Models\Transaction;
 
-class CompletedPurchase
+class Response
 {
     private $isSuccessful;
     private $transaction;

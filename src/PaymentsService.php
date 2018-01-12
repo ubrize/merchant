@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Omnipay\Common\GatewayInterface;
 use Omnipay\Common\Message\ResponseInterface;
 use Illuminate\Support\Facades\Log;
-use Arbory\Merchant\Utils\CompletedPurchase;
+use Arbory\Merchant\Utils\Response;
 
 class PaymentsService
 {
@@ -18,7 +18,7 @@ class PaymentsService
      * @param Order $order
      * @param string $gatewayName
      * @param array $customArgs
-     * @return bool redirects or returns bool ir payment is successful
+     * @return Response redirects or returns Response with status and orders transaction
      */
     public function purchase(Order $order, string $gatewayName, array $customArgs)
     {
@@ -41,9 +41,10 @@ class PaymentsService
             $this->setTransactionInitialized($transaction);
 
             if ($response->isSuccessful()) {
-                $this->setTransactionProcessed($transaction);
                 // Payment successful
-                return true;
+                $this->setTransactionProcessed($transaction);
+                return new Response(true, $transaction);
+
             } elseif ($response->isRedirect() || $response->isTransparentRedirect()) {
                 $this->setTransactionAccepted($transaction);
                 $this->logTransactionRequest($transaction, ['redirect to merchant..']);
@@ -52,13 +53,14 @@ class PaymentsService
                 // Payment failed
                 $this->setTransactionError($transaction);
                 $this->logTransactionError($transaction, $response->getMessage());
+                return new Response(false, $transaction);
             }
         } catch (\Exception $e) {
-            $this->setTransactionError($transaction);
-            $this->logTransactionError($transaction, $e->getCode() .':'. $e->getMessage());
+            //unknown gateway or other errors in logic
+            \Log::error($e->getMessage());
         }
 
-        return false;
+        return new Response(false);
     }
 
 
@@ -66,7 +68,7 @@ class PaymentsService
      * Returns transaction if payment completed or false if payment failed
      * @param string $gatewayName
      * @param Request $request
-     * @return CompletedPurchase
+     * @return Response
      */
     public function completePurchase(string $gatewayName, Request $request)
     {
@@ -90,19 +92,19 @@ class PaymentsService
             if ($response->isSuccessful()) {
                 // purchase finished
                 $this->setTransactionProcessed($transaction);
-                return new CompletedPurchase(true, $transaction);
+                return new Response(true, $transaction);
             }
 
             //we got error
             $this->setTransactionError($transaction);
             $this->logTransactionError($transaction, $response->getData());
+            return new Response(false, $transaction);
 
-            return new CompletedPurchase(false, $transaction);
         } catch (\Exception $e) {
             \Log::warning('PaymentService:completePurchase:'.$e->getMessage());
         }
 
-        return new CompletedPurchase(false);
+        return new Response(false);
     }
 
     /**

@@ -28,6 +28,7 @@ class Order extends Model
         'session_id',
         'owner_type',
         'owner_id',
+        'client_ip'
     ];
 
     public function owner()
@@ -48,5 +49,10 @@ class Order extends Model
     public function __toString()
     {
         return (string) OrderHelper::getOrderNumber($this);
+    }
+
+    public function transactions()
+    {
+        return $this->morphMany(Transaction::class, 'object', 'object_id', 'object_class');
     }
 }
