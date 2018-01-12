@@ -7,6 +7,7 @@ use Arbory\Merchant\Models\Transaction;
 use Arbory\Merchant\Utils\GatewayHandlerFactory;
 use Illuminate\Http\Request;
 use Omnipay\Common\GatewayInterface;
+use Omnipay\Common\Message\AbstractResponse;
 use Omnipay\Common\Message\ResponseInterface;
 use Illuminate\Support\Facades\Log;
 use Arbory\Merchant\Utils\Response;
@@ -107,6 +108,33 @@ class PaymentsService
     }
 
     /**
+     * Reverse transaction (master card specific), for technical errors only otherwise use refund
+     * @param string $gatewayName
+     * @param Transaction $transaction
+     * @param $amount
+     * @return Response
+     * @throws \Exception
+     */
+    public function reverseTransaction(string $gatewayName, Transaction $transaction, $amount)
+    {
+        $gatewayObj = \Omnipay::gateway($gatewayName);
+
+        //this is custom method gateways method
+        //TODO: combine reverse with refund and determine correct response via passed option value?
+        if(!method_exists($gatewayObj, 'reverse')){
+            throw new \Exception("$gatewayName does not support transaction reversal");
+        }
+
+        $this->setReversalArgs($transaction, $gatewayObj, ['amount' => $amount]);
+        /** @var AbstractResponse $response */
+        $response = $gatewayObj->reverse($transaction->options['reverseTransaction']);
+        if($response->isSuccessful()){
+            return new Response(true, $transaction);
+        }
+        return new Response(false, $transaction);
+    }
+
+    /**
      * Some gateways will send their token reference (gateways own token for transaction)
      *
      * @param ResponseInterface $response
@@ -114,6 +142,19 @@ class PaymentsService
     private function saveTransactionReference(Transaction $transaction, ResponseInterface $response)
     {
         $transaction->token_reference = $response->getTransactionReference();
+        $transaction->save();
+    }
+
+    private function setReversalArgs(Transaction $transaction, GatewayInterface $gatewayObj, $customArgs)
+    {
+        $gatewayHandler = (new GatewayHandlerFactory())->create($gatewayObj);
+
+        $gatewayArgs = $gatewayHandler->getReversalArguments($transaction);
+        $allArguments = $customArgs + $gatewayArgs;
+
+        $options = $transaction->options;
+        $options['reverseTransaction'] = $allArguments;
+        $transaction->options = $options;
         $transaction->save();
     }
 
@@ -163,7 +204,7 @@ class PaymentsService
     }
 
     //Int to float with 2 numbers after floating point
-    public function transformToFloat($intValue){
+    private function transformToFloat($intValue){
         // round and float
         $float = round(($intValue/100), 2, PHP_ROUND_HALF_EVEN);
         return number_format($float, 2, '.', '');
