@@ -141,7 +141,7 @@ class PaymentsService
 
     private function setPurchaseArgs(Transaction $transaction, GatewayInterface $gatewayObj, $customArgs)
     {
-        // Each gateway can have a little different request arguments
+        // Each gateway can have different request arguments
         $gatewayHandler = (new GatewayHandlerFactory())->create($gatewayObj);
         $gatewayArgs = $gatewayHandler->getPurchaseArguments($transaction);
 
@@ -153,7 +153,7 @@ class PaymentsService
         ];
 
         // Custom arguments from checkout (purchase description etc.)
-        $args = $customArgs + $gatewayArgs + $commonArgs;
+        $args = $customArgs + $commonArgs + $gatewayArgs;
 
         $options = $transaction->options;
         $options['purchase'] = $args;
@@ -181,7 +181,7 @@ class PaymentsService
             'description' => '',
             'language_code' => $this->getGatewaysLanguage($gateway, $order->language),
             'currency_code' => $order->payment_currency,
-            'client_ip' => request()->ip()
+            'client_ip' => $order->client_ip
         ]);
     }
 
