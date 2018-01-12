@@ -7,6 +7,7 @@ use Arbory\Merchant\Models\Transaction;
 use Arbory\Merchant\Utils\GatewayHandlerFactory;
 use Illuminate\Http\Request;
 use Omnipay\Common\GatewayInterface;
+use Omnipay\Common\Message\AbstractRequest;
 use Omnipay\Common\Message\AbstractResponse;
 use Omnipay\Common\Message\ResponseInterface;
 use Illuminate\Support\Facades\Log;
@@ -149,6 +150,20 @@ class PaymentsService
         return new Response(false, $transaction);
     }
 
+
+    public function closeDay(string $gatewayName)
+    {
+        $gatewayObj = \Omnipay::gateway($gatewayName);
+        //this is custom method gateways method
+        if(!method_exists($gatewayObj, 'closeDay')){
+            throw new \Exception("$gatewayName does not support business day closing");
+        }
+        /** @var AbstractRequest $request */
+        $request = $gatewayObj->closeDay();
+        /** @var AbstractResponse $response */
+        $response = $request->send();
+        return new Response($response->isSuccessful());
+    }
     /**
      * Some gateways will send their token reference (gateways own token for transaction)
      *
