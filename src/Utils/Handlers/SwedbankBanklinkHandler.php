@@ -1,9 +1,10 @@
 <?php
 
-namespace Arbory\Merchant\Utils;
+namespace Arbory\Merchant\Utils\Handlers;
 
 use Illuminate\Http\Request;
 use Arbory\Merchant\Models\Transaction;
+use Arbory\Merchant\Utils\GatewayHandler;
 
 class SwedbankBanklinkHandler extends GatewayHandler
 {
@@ -28,7 +29,7 @@ class SwedbankBanklinkHandler extends GatewayHandler
             'en' => 'ENG'
         ];
         if(isset($codeToSupportedLang[$suggestedLanguage])){
-            return $codeToSupportedLang($suggestedLanguage);
+            return $codeToSupportedLang[$suggestedLanguage];
         }
         return $defaultLangauge;
     }

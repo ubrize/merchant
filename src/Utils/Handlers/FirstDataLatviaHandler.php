@@ -1,9 +1,10 @@
 <?php
 
-namespace Arbory\Merchant\Utils;
+namespace Arbory\Merchant\Utils\Handlers;
 
 use Illuminate\Http\Request;
 use Arbory\Merchant\Models\Transaction;
+use Arbory\Merchant\Utils\GatewayHandler;
 
 class FirstDataLatviaHandler extends GatewayHandler
 {

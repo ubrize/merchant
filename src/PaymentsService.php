@@ -31,6 +31,7 @@ class PaymentsService
             /** @var Transaction $transaction */
             $transaction = $this->createTransaction($order, $gatewayObj);
             $this->setPurchaseArgs($transaction, $gatewayObj, $customArgs);
+            $this->setTransactionInitialized($transaction);
 
             $purchaseRequest = $gatewayObj->purchase($transaction->options['purchase']);
             $this->logTransactionRequest($transaction, $purchaseRequest->getData());
@@ -41,16 +42,12 @@ class PaymentsService
             if ($response->isSuccessful()) {
                 // Save transactions reference, if gateway responds with it
                 $this->saveTransactionReference($transaction, $response);
-                $this->setTransactionInitialized($transaction);
-
                 $this->setTransactionProcessed($transaction);
                 return new Response(true, $transaction);
 
             } elseif ($response->isRedirect() || $response->isTransparentRedirect()) {
                 // Save transactions reference, if gateway responds with it
                 $this->saveTransactionReference($transaction, $response);
-                $this->setTransactionInitialized($transaction);
-
                 $this->setTransactionAccepted($transaction);
                 $this->logTransactionRequest($transaction, ['redirect to merchant..']);
                 $response->redirect();
@@ -87,7 +84,6 @@ class PaymentsService
 
             $this->setCompletionArgs($transaction, $gatewayObj);
 
-            //TODO: add parameters for each gateway?!
             $completeRequest = $gatewayObj->completePurchase($transaction->options['completePurchase']);
             $this->logTransactionRequest($transaction, $completeRequest->getData());
 
