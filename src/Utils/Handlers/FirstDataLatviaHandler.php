@@ -21,7 +21,7 @@ class FirstDataLatviaHandler extends GatewayHandler
         return $transactionRef;
     }
 
-    public function getCompletePurchaseArguments(Transaction $transaction): array
+    public function getCompletePurchaseArguments(Transaction $transaction, Request $request): array
     {
         $purchaseParameters = $transaction->options['purchase'];
         $purchaseParameters['transactionReference'] = $transaction->token_reference;

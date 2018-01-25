@@ -25,7 +25,7 @@ class PaymentsService
     public function purchase(Order $order, string $gatewayName, array $customArgs)
     {
         try {
-            // Will throw exception if not existing gateway
+            // Will throw exception on nonexistent gateway
             $gatewayObj = \Omnipay::gateway($gatewayName);
 
             /** @var Transaction $transaction */
@@ -33,32 +33,40 @@ class PaymentsService
             $this->setPurchaseArgs($transaction, $gatewayObj, $customArgs);
             $this->setTransactionInitialized($transaction);
 
-            $purchaseRequest = $gatewayObj->purchase($transaction->options['purchase']);
-            $this->logTransactionRequest($transaction, $purchaseRequest->getData());
+            try{
+                $purchaseRequest = $gatewayObj->purchase($transaction->options['purchase']);
+                $this->logTransactionRequest($transaction, $purchaseRequest->getData());
 
-            $response = $purchaseRequest->send();
-            $this->logTransactionResponse($transaction, $response->getData());
+                $response = $purchaseRequest->send();
+                $this->logTransactionResponse($transaction, $response->getData());
 
-            if ($response->isSuccessful()) {
-                // Save transactions reference, if gateway responds with it
-                $this->saveTransactionReference($transaction, $response);
-                $this->setTransactionProcessed($transaction);
-                return new Response(true, $transaction);
+                if ($response->isSuccessful()) {
+                    // Save transactions reference, if gateway responds with it
+                    $this->saveTransactionReference($transaction, $response);
+                    $this->setTransactionProcessed($transaction);
+                    return new Response(true, $transaction);
 
-            } elseif ($response->isRedirect() || $response->isTransparentRedirect()) {
-                // Save transactions reference, if gateway responds with it
-                $this->saveTransactionReference($transaction, $response);
-                $this->setTransactionAccepted($transaction);
-                $this->logTransactionRequest($transaction, ['redirect to merchant..']);
-                $response->redirect();
-            } else {
-                // Payment failed
-                $this->setTransactionError($transaction);
-                $this->logTransactionError($transaction, $response->getMessage());
-                return new Response(false, $transaction);
+                } elseif ($response->isRedirect() || $response->isTransparentRedirect()) {
+                    // Save transactions reference, if gateway responds with it
+                    $this->saveTransactionReference($transaction, $response);
+                    $this->setTransactionAccepted($transaction);
+                    $this->logTransactionRequest($transaction, ['redirect to merchant..']);
+                    $response->redirect();
+                }else{
+                    // Payment failed
+                    $this->logTransactionError($transaction, $response->getMessage());
+                }
+            }catch (\Exception $e){
+                // Validation or other errors
+                $this->logTransactionError($transaction, $e->getMessage());
             }
+
+            //Log response error
+            $this->setTransactionError($transaction);
+            return new Response(false, $transaction);
+
         } catch (\Exception $e) {
-            //unknown gateway or other errors in logic
+            //unknown gateway or transaction errors
             \Log::error($e->getMessage());
         }
 
@@ -75,33 +83,40 @@ class PaymentsService
     public function completePurchase(string $gatewayName, Request $request)
     {
         try {
-            // Will throw exception if not existing gateway
             $gatewayObj = \Omnipay::gateway($gatewayName);
 
             /** @var Transaction $transaction */
             $transaction = $this->getRequestsTransaction($gatewayObj, $request);
             $this->logTransactionResponse($transaction, $request->input());
 
-            $this->setCompletionArgs($transaction, $gatewayObj);
+            try{
+                // Send complete request
+                $this->setCompletionArgs($transaction, $gatewayObj, $request);
+                $completeRequest = $gatewayObj->completePurchase($transaction->options['completePurchase']);
+                $this->logTransactionRequest($transaction, $completeRequest->getData());
 
-            $completeRequest = $gatewayObj->completePurchase($transaction->options['completePurchase']);
-            $this->logTransactionRequest($transaction, $completeRequest->getData());
+                // Receive completion response
+                $response = $completeRequest->send();
+                $this->logTransactionResponse($transaction, $response->getData());
 
-            $response = $completeRequest->send();
-            $this->logTransactionResponse($transaction, $response->getData());
+                if ($response->isSuccessful()) {
+                    $this->setTransactionProcessed($transaction);
+                    return new Response(true, $transaction);
+                }else{
+                    $this->logTransactionError($transaction, $response->getMessage());
+                }
 
-            if ($response->isSuccessful()) {
-                // purchase finished
-                $this->setTransactionProcessed($transaction);
-                return new Response(true, $transaction);
+            }catch (\Exception $e){
+                // Validation or other errors
+                $this->logTransactionError($transaction, $e->getMessage());
             }
 
-            //we got error
+            //Log response error
             $this->setTransactionError($transaction);
-            $this->logTransactionError($transaction, $response->getData());
             return new Response(false, $transaction);
 
         } catch (\Exception $e) {
+            // Log error in file, we have no transaction to log this to
             \Log::warning('PaymentService:completePurchase:'.$e->getMessage());
         }
 
@@ -199,11 +214,11 @@ class PaymentsService
         throw new \InvalidArgumentException('Transaction not found');
     }
 
-    private function setCompletionArgs(Transaction $transaction, GatewayInterface $gatewayObj)
+    private function setCompletionArgs(Transaction $transaction, GatewayInterface $gatewayObj, Request $request)
     {
         $gatewayHandler = (new GatewayHandlerFactory())->create($gatewayObj);
         $options = $transaction->options;
-        $options['completePurchase'] = $gatewayHandler->getCompletePurchaseArguments($transaction);
+        $options['completePurchase'] = $gatewayHandler->getCompletePurchaseArguments($transaction, $request);
         $transaction->options = $options;
         $transaction->save();
     }

@@ -9,7 +9,7 @@ abstract class GatewayHandler
 {
     public abstract function getTransactionReference(Request $request): string;
 
-    public function getCompletePurchaseArguments(Transaction $transaction): array
+    public function getCompletePurchaseArguments(Transaction $transaction, Request $request): array
     {
         return [];
     }
