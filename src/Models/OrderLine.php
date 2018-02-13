@@ -25,6 +25,11 @@ class OrderLine extends Model
         return $this->belongsTo(Order::class);
     }
 
+    public function product()
+    {
+        return $this->morphTo('object', 'object_class', 'object_id');
+    }
+
     protected $casts = [
         'object_options' => 'array',
     ];
