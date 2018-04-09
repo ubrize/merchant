@@ -15,6 +15,38 @@ use Arbory\Merchant\Utils\Response;
 
 class PaymentsService
 {
+    /**
+     * @param Order $order
+     * @param string $gatewayName
+     * @param array $customArgs
+     * @return Response
+     */
+    public function purchase(Order $order, string $gatewayName, array $customArgs)
+    {
+        return $this->execute($order, $gatewayName, $customArgs, 'purchase');
+    }
+
+    /**
+     * @param Order $order
+     * @param string $gatewayName
+     * @param array $customArgs
+     * @return Response
+     */
+    public function authorizeRecurring(Order $order, string $gatewayName, array $customArgs)
+    {
+        return $this->execute($order, $gatewayName, $customArgs, 'authorizeRecurring');
+    }
+
+    /**
+     * @param Order $order
+     * @param string $gatewayName
+     * @param array $customArgs
+     * @return Response
+     */
+    public function executeRecurring(Order $order, string $gatewayName, array $customArgs)
+    {
+        return $this->execute($order, $gatewayName, $customArgs, 'executeRecurring');
+    }
 
     /**
      * @param Order $order
@@ -22,7 +54,7 @@ class PaymentsService
      * @param array $customArgs
      * @return Response redirects or returns Response with status and orders transaction
      */
-    public function purchase(Order $order, string $gatewayName, array $customArgs)
+    public function execute(Order $order, string $gatewayName, array $customArgs, string $method)
     {
         try {
             // Will throw exception on nonexistent gateway
@@ -30,11 +62,13 @@ class PaymentsService
 
             /** @var Transaction $transaction */
             $transaction = $this->createTransaction($order, $gatewayObj);
-            $this->setPurchaseArgs($transaction, $gatewayObj, $customArgs);
+
+            $this->setArguments($transaction, $gatewayObj, $customArgs, $method);
             $this->setTransactionInitialized($transaction);
 
-            try{
-                $purchaseRequest = $gatewayObj->purchase($transaction->options['purchase']);
+            try {
+                $options = !empty($transaction->options[$method]) ? $transaction->options[$method] : [];
+                $purchaseRequest = $gatewayObj->$method($options);
                 $this->logTransactionRequest($transaction, $purchaseRequest->getData());
 
                 $response = $purchaseRequest->send();
@@ -52,11 +86,11 @@ class PaymentsService
                     $this->setTransactionAccepted($transaction);
                     $this->logTransactionRequest($transaction, ['redirect to merchant..']);
                     $response->redirect();
-                }else{
+                } else {
                     // Payment failed
                     $this->logTransactionError($transaction, $response->getMessage());
                 }
-            }catch (\Exception $e){
+            } catch (\Exception $e) {
                 // Validation or other errors
                 $this->logTransactionError($transaction, $e->getMessage());
             }
@@ -73,7 +107,6 @@ class PaymentsService
         return new Response(false);
     }
 
-
     /**
      * Returns transaction if payment completed or false if payment failed
      * @param string $gatewayName
@@ -84,42 +117,34 @@ class PaymentsService
     {
         try {
             $gatewayObj = \Omnipay::gateway($gatewayName);
-
             /** @var Transaction $transaction */
             $transaction = $this->getRequestsTransaction($gatewayObj, $request);
             $this->logTransactionResponse($transaction, $request->input());
-
             try{
                 // Send complete request
                 $this->setCompletionArgs($transaction, $gatewayObj, $request);
                 $completeRequest = $gatewayObj->completePurchase($transaction->options['completePurchase']);
                 $this->logTransactionRequest($transaction, $completeRequest->getData());
-
                 // Receive completion response
                 $response = $completeRequest->send();
                 $this->logTransactionResponse($transaction, $response->getData());
-
                 if ($response->isSuccessful()) {
                     $this->setTransactionProcessed($transaction);
                     return new Response(true, $transaction);
                 }else{
                     $this->logTransactionError($transaction, $response->getMessage());
                 }
-
             }catch (\Exception $e){
                 // Validation or other errors
                 $this->logTransactionError($transaction, $e->getMessage());
             }
-
             //Log response error
             $this->setTransactionError($transaction);
             return new Response(false, $transaction);
-
         } catch (\Exception $e) {
             // Log error in file, we have no transaction to log this to
             \Log::warning('PaymentService:completePurchase:'.$e->getMessage());
         }
-
         return new Response(false);
     }
 
@@ -176,6 +201,7 @@ class PaymentsService
         \Log::info('PaymentService:closeDay - ' . print_r($response->getData(), 1));
         return new Response($response->isSuccessful());
     }
+
     /**
      * Some gateways will send their token reference (gateways own token for transaction)
      *
@@ -245,6 +271,46 @@ class PaymentsService
         $transaction->save();
     }
 
+    /**
+     * @param Transaction $transaction
+     * @param GatewayInterface $gatewayObj
+     * @param array $customArgs
+     */
+    private function setAuthorizeRecurringArgs(Transaction $transaction, GatewayInterface $gatewayObj, array $customArgs)
+    {
+        $commonArgs = [
+            'language' => $transaction->language_code,
+            'amount' => $this->transformToFloat($transaction->amount),
+            'currency' => $transaction->currency_code
+        ];
+
+        $args = $customArgs + $commonArgs;
+        $options = $transaction->options;
+        $options['authorizeRecurring'] = $args;
+        $transaction->options = $options;
+        $transaction->save();
+    }
+
+    /**
+     * @param Transaction $transaction
+     * @param GatewayInterface $gatewayObj
+     * @param array $customArgs
+     */
+    private function setExecuteRecurringArgs(Transaction $transaction, GatewayInterface $gatewayObj, array $customArgs)
+    {
+        $commonArgs = [
+            'language' => $transaction->language_code,
+            'amount' => $this->transformToFloat($transaction->amount),
+            'currency' => $transaction->currency_code
+        ];
+
+        $args = $customArgs + $commonArgs;
+        $options = $transaction->options;
+        $options['executeRecurring'] = $args;
+        $transaction->options = $options;
+        $transaction->save();
+    }
+
     //Int to float with 2 numbers after floating point
     private function transformToFloat($intValue){
         // round and float
@@ -279,7 +345,7 @@ class PaymentsService
      */
     protected function getGatewaysLanguage(GatewayInterface $gateway, string $suggestedLanguage)
     {
-         return (new GatewayHandlerFactory())->create($gateway)->getLanguage($suggestedLanguage);
+        return (new GatewayHandlerFactory())->create($gateway)->getLanguage($suggestedLanguage);
     }
 
     protected function setTransactionInitialized(Transaction $transaction)
@@ -326,5 +392,20 @@ class PaymentsService
         $transaction->refresh();
         $transaction->response = $transaction->response . '[response|'. date('Y.m.d h:i:s').']: '  . print_r($msg, true);
         $transaction->save();
+    }
+
+    /**
+     * @param Transaction $transaction
+     * @param GatewayInterface $gatewayObj
+     * @param array $customArgs
+     * @param string $method
+     */
+    protected function setArguments(Transaction $transaction, GatewayInterface $gatewayObj, array $customArgs, string $method)
+    {
+        $methodName = 'set' . camel_case($method) . 'Args';
+
+        if (method_exists($this, $methodName)) {
+            $this->$methodName($transaction, $gatewayObj, $customArgs);
+        }
     }
 }

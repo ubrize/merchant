@@ -23,7 +23,14 @@ class FirstDataLatviaHandler extends GatewayHandler
 
     public function getCompletePurchaseArguments(Transaction $transaction, Request $request): array
     {
-        $purchaseParameters = $transaction->options['purchase'];
+        $possibleActions = ['purchase', 'authorizeRecurring', 'executeRecurring'];
+        $purchaseParameters = [];
+
+        foreach ($possibleActions as $action) {
+            if (!empty($transaction->options[$action])) {
+                $purchaseParameters = $transaction->options[$action];
+            }
+        }
         $purchaseParameters['transactionReference'] = $transaction->token_reference;
         return $purchaseParameters;
     }
