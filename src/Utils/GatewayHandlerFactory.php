@@ -8,6 +8,7 @@ use Omnipay\Common\GatewayInterface;
 use Arbory\Merchant\Utils\Handlers\FirstDataLatviaHandler;
 use Arbory\Merchant\Utils\Handlers\SwedbankBanklinkHandler;
 use Arbory\Merchant\Utils\Handlers\DnbLinkHandler;
+use Arbory\Merchant\Utils\Handlers\SebLinkHandler;
 
 class GatewayHandlerFactory
 {
@@ -15,7 +16,8 @@ class GatewayHandlerFactory
         'Omnipay\FirstDataLatvia\Gateway' => FirstDataLatviaHandler::class,
         'Omnipay\SwedbankBanklink\Gateway' => SwedbankBanklinkHandler::class,
         'Omnipay\NordeaLink\Gateway' => NordeaLinkHandler::class,
-        'Omnipay\DnbLink\Gateway' => DnbLinkHandler::class
+        'Omnipay\DnbLink\Gateway' => DnbLinkHandler::class,
+        'Omnipay\SebLink\Gateway' => SebLinkHandler::class
     ];
 
     public function create(GatewayInterface $gatewayInterface): GatewayHandler
