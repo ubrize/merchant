@@ -6,11 +6,11 @@ use Arbory\Merchant\Models\Order;
 use Arbory\Merchant\Models\Transaction;
 use Arbory\Merchant\Utils\GatewayHandlerFactory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Omnipay\Common\GatewayInterface;
 use Omnipay\Common\Message\AbstractRequest;
 use Omnipay\Common\Message\AbstractResponse;
 use Omnipay\Common\Message\ResponseInterface;
-use Illuminate\Support\Facades\Log;
 use Arbory\Merchant\Utils\Response;
 
 class PaymentsService
@@ -101,10 +101,9 @@ class PaymentsService
 
         } catch (\Exception $e) {
             //unknown gateway or transaction errors
-            \Log::error($e->getMessage());
+            throw new \Exception($e->getMessage());
         }
 
-        return new Response(false);
     }
 
     /**
@@ -198,7 +197,6 @@ class PaymentsService
         $request = $gatewayObj->closeDay();
         /** @var AbstractResponse $response */
         $response = $request->send();
-        \Log::info('PaymentService:closeDay - ' . print_r($response->getData(), 1));
         return new Response($response->isSuccessful());
     }
 
@@ -327,7 +325,7 @@ class PaymentsService
             'gateway' => get_class($gateway),
             'options' => [], // will be populated on every request
             'amount' => $order->total,
-            'token_id' => str_random('20'), //TODO: Do we need internal token?
+            'token_id' => Str::random('20'), //TODO: Do we need internal token?
             'description' => '',
             'language_code' => $this->getGatewaysLanguage($gateway, $order->language),
             'currency_code' => $order->payment_currency,
@@ -402,7 +400,7 @@ class PaymentsService
      */
     protected function setArguments(Transaction $transaction, GatewayInterface $gatewayObj, array $customArgs, string $method)
     {
-        $methodName = 'set' . camel_case($method) . 'Args';
+        $methodName = 'set' . Str::camel($method) . 'Args';
 
         if (method_exists($this, $methodName)) {
             $this->$methodName($transaction, $gatewayObj, $customArgs);
