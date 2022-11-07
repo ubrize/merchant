@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Arbory\Merchant\Models\Transaction;
 use Arbory\Merchant\Utils\GatewayHandler;
 
-class FirstDataLatviaHandler extends GatewayHandler
+class WorldlineHandler extends GatewayHandler
 {
     public function getReversalArguments(Transaction $transaction): array
     {

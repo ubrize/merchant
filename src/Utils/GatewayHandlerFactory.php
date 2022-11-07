@@ -5,7 +5,7 @@ namespace Arbory\Merchant\Utils;
 use Arbory\Merchant\Utils\Handlers\NordeaLinkHandler;
 use Faker\Provider\bn_BD\Utils;
 use Omnipay\Common\GatewayInterface;
-use Arbory\Merchant\Utils\Handlers\FirstDataLatviaHandler;
+use Arbory\Merchant\Utils\Handlers\WorldlineHandler;
 use Arbory\Merchant\Utils\Handlers\SwedbankBanklinkHandler;
 use Arbory\Merchant\Utils\Handlers\DnbLinkHandler;
 use Arbory\Merchant\Utils\Handlers\SebLinkHandler;
@@ -13,7 +13,7 @@ use Arbory\Merchant\Utils\Handlers\SebLinkHandler;
 class GatewayHandlerFactory
 {
     private $classMap = [
-        'Omnipay\FirstDataLatvia\Gateway' => FirstDataLatviaHandler::class,
+        'Omnipay\Worldline\Gateway' => WorldlineHandler::class,
         'Omnipay\SwedbankBanklink\Gateway' => SwedbankBanklinkHandler::class,
         'Omnipay\NordeaLink\Gateway' => NordeaLinkHandler::class,
         'Omnipay\DnbLink\Gateway' => DnbLinkHandler::class,
