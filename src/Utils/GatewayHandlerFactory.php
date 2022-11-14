@@ -7,7 +7,7 @@ use Faker\Provider\bn_BD\Utils;
 use Omnipay\Common\GatewayInterface;
 use Arbory\Merchant\Utils\Handlers\WorldlineHandler;
 use Arbory\Merchant\Utils\Handlers\SwedbankBanklinkHandler;
-use Arbory\Merchant\Utils\Handlers\DnbLinkHandler;
+use Arbory\Merchant\Utils\Handlers\LuminorHandler;
 use Arbory\Merchant\Utils\Handlers\SebLinkHandler;
 
 class GatewayHandlerFactory
@@ -16,7 +16,7 @@ class GatewayHandlerFactory
         'Omnipay\Worldline\Gateway' => WorldlineHandler::class,
         'Omnipay\SwedbankBanklink\Gateway' => SwedbankBanklinkHandler::class,
         'Omnipay\NordeaLink\Gateway' => NordeaLinkHandler::class,
-        'Omnipay\DnbLink\Gateway' => DnbLinkHandler::class,
+        'Omnipay\Luminor\Gateway' => LuminorHandler::class,
         'Omnipay\SebLink\Gateway' => SebLinkHandler::class
     ];
 
