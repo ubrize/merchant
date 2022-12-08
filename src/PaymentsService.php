@@ -86,6 +86,7 @@ class PaymentsService
                     $this->setTransactionAccepted($transaction);
                     $this->logTransactionRequest($transaction, ['redirect to merchant..']);
                     $response->redirect();
+                    die();
                 } else {
                     // Payment failed
                     $this->logTransactionError($transaction, $response->getMessage());
