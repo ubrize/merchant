@@ -16,7 +16,9 @@ class SwedbankBanklinkHandler extends GatewayHandler
     public function getPurchaseArguments(Transaction $transaction) : array
     {
         // order reference id should be passed on implementation if necessary
-        return [];
+        return [
+            'transactionReference' => $transaction->token_id
+        ];
     }
 
     public function getLanguage(string $suggestedLanguage): string
